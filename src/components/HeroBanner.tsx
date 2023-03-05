@@ -5,7 +5,7 @@ import { prepareWriteContract, writeContract } from "@wagmi/core";
 import { erc721ABI, useAccount, UseContractConfig } from "wagmi";
 import { InferGetServerSidePropsType } from "next";
 import { type IHandleData } from "~/pages/api/twitter/getHandle";
-import jailBreaker from "../../utils/JailBreaker.json";
+import jailBreaker from "../../utils/jailBreaker.json";
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
 import { useDisconnect } from "wagmi";
 
