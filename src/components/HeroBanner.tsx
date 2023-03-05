@@ -50,7 +50,7 @@ const Navbar: FC = () => {
     address: jailBreaker.address as `0x${string}`,
     abi: jailBreaker.abi,
     functionName: "mint",
-    args: [handleData, address],
+    args: [encodeURIComponent(handleData), address],
   });
 
   const { data, isLoading, isSuccess, write } = useContractWrite(config);
