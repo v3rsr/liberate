@@ -3,7 +3,7 @@ import { getToken } from "next-auth/jwt";
 import { getSession } from "next-auth/react";
 import { env } from "../../../../src/env.mjs";
 
-type Data = {
+export type Data = {
   handle: string;
 };
 

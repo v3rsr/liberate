@@ -4,7 +4,7 @@ import { ConnectKitButton } from "connectkit";
 import { prepareWriteContract, writeContract } from "@wagmi/core";
 import { erc721ABI } from "wagmi";
 import { InferGetServerSidePropsType } from "next";
-import { getToken } from "next-auth/jwt";
+import { type Data } from "~/pages/api/twitter/getHandle";
 
 export const getServerSideProps = async () => {
   const res = await fetch("/api/twitter/getHandle");
@@ -24,18 +24,19 @@ const Navbar: FC = () => {
     session ? void signOut() : void signIn();
   };
 
-  // const [data, setData] = useState(null)
-  // const [isLoading, setLoading] = useState(false)
+  const [data, setData] = useState("");
+  const [isLoading, setLoading] = useState(false);
 
-  // useEffect(() => {
-  //   setLoading(true)
-  //   fetch('/api/twitter/getHandle')
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       setData(data)
-  //       setLoading(false)
-  //     })
-  // }, [])
+  useEffect(() => {
+    setLoading(true);
+    const handle = fetch("/api/twitter/getHandle")
+      .then((res) => res.json())
+      .then((data: Data) => {
+        setData(data.handle);
+        setLoading(false);
+      });
+    setLoading(false);
+  }, [data, isLoading]);
 
   // const handleConnect = (address: `0x${string}`) => {
   //   // const config = await prepareWriteContract({
@@ -81,12 +82,12 @@ const Navbar: FC = () => {
                           onClick={show}
                           className="mt-10 rounded-full bg-sky-500 px-20 py-4 text-lg font-normal text-slate-300 hover:bg-sky-700"
                         >
-                          {isConnected
+                          {isConnected && data !== ""
                             ? "Claim @" +
-                              (session?.user?.name ?? "") +
+                              (data ?? "") +
                               " to " +
                               (ensName ?? truncatedAddress ?? "")
-                            : "Claim @" + (session?.user?.name ?? "")}
+                            : "Claim @" + (data ?? "")}
                         </button>
                       );
                     }}
