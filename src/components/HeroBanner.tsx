@@ -2,21 +2,17 @@ import { FC, useEffect, useState } from "react";
 import { useSession, signIn, signOut, SessionContext } from "next-auth/react";
 import { ConnectKitButton } from "connectkit";
 import { prepareWriteContract, writeContract } from "@wagmi/core";
-import { erc721ABI } from "wagmi";
+import { erc721ABI, useAccount, UseContractConfig } from "wagmi";
 import { InferGetServerSidePropsType } from "next";
 import { type IHandleData } from "~/pages/api/twitter/getHandle";
+import jailBreaker from "../../JailBreaker.json";
+import { useContractWrite, usePrepareContractWrite } from "wagmi";
+import { useDisconnect } from "wagmi";
 
-export const getServerSideProps = async () => {
-  const res = await fetch("/api/twitter/getHandle");
-  const handle: string = (await res.json()) as string;
-  console.log(handle);
-
-  return {
-    props: {
-      handle,
-    },
-  };
-};
+// const contractConfig: UseContractConfig = {
+//   address: jailBreaker.address,
+//   abi: jailBreaker.abi,
+// };
 
 const Navbar: FC = () => {
   const { data: session } = useSession();
@@ -24,34 +20,49 @@ const Navbar: FC = () => {
     session ? void signOut() : void signIn();
   };
 
-  const [data, setData] = useState("");
+  const [handleData, setHandleData] = useState("");
   const [provider, setProvider] = useState("");
-  const [isLoading, setLoading] = useState(false);
+  const [isHandleLoading, setIsHandleLoading] = useState(false);
+  const [isContractLoading, setIsContractLoading] = useState(false);
+  const { address, isConnected } = useAccount();
+
+  const { disconnect } = useDisconnect();
 
   console.log(session);
 
   useEffect(() => {
-    setLoading(true);
+    setIsHandleLoading(true);
     const handle = fetch("/api/twitter/getHandle")
       .then((res) => res.json())
       .then((data: IHandleData) => {
-        setData(data.handle);
+        setHandleData(data.handle);
         setProvider(data.provider);
-        setLoading(false);
+        setIsHandleLoading(false);
       });
 
-    setLoading(false);
-  }, [data, isLoading]);
+    setIsHandleLoading(false);
+  }, [handleData, isHandleLoading]);
   console.log(provider);
 
-  // const handleConnect = (address: `0x${string}`) => {
-  //   // const config = await prepareWriteContract({
-  //   //   address: address,
-  //   //   abi: erc721ABI,
-  //   //   functionName: "approve",
-  //   // });
-  //   const data = await writeContract(confi  g);
-  // };
+  const { config, error } = usePrepareContractWrite({
+    address: jailBreaker.address as `0x${string}`,
+    abi: jailBreaker.abi,
+    functionName: "mint",
+    args: [handleData ?? session?.user?.name, address],
+  });
+
+  const { data, isLoading, isSuccess, write } = useContractWrite(config);
+
+  const handleClaim = () => {
+    try {
+      write?.();
+    } catch (e) {
+      console.log(e);
+    } finally {
+      console.log("finally");
+    }
+  };
+
   return (
     <div className="my-20 mx-8 md:mx-auto md:my-40">
       <div className="rounded-2xl bg-transparent shadow-[30px_38px_100px_5px_rgb(0,254,162,0.25)]">
@@ -82,37 +93,52 @@ const Navbar: FC = () => {
                     alt="user image"
                     className="rounded-2xl"
                   />
-                  <ConnectKitButton.Custom>
-                    {({ isConnected, show, truncatedAddress, ensName }) => {
-                      return (
-                        <button
-                          onClick={show}
-                          className="mt-10 rounded-full bg-sky-500 px-10 py-2 text-lg font-normal text-slate-300 hover:bg-sky-700 md:px-20 md:py-4"
-                        >
-                          {isConnected &&
-                            (provider === "twitter"
-                              ? "Claim @" +
-                                (data ?? "") +
-                                " to " +
-                                (ensName ?? truncatedAddress ?? "")
-                              : "Claim @" +
-                                (session?.user?.name ?? "") +
-                                " to " +
-                                (ensName ?? truncatedAddress ?? ""))}
-                          {!isConnected &&
-                            (provider === "twitter"
-                              ? "Claim @" + (data ?? "")
-                              : "Claim @" + (session?.user?.name ?? ""))}
-                        </button>
-                      );
-                    }}
-                  </ConnectKitButton.Custom>
-                  <button
-                    onClick={handleLogin}
-                    className="mt-4 text-sm text-white md:hidden"
-                  >
-                    Sign out
-                  </button>
+                  {!isConnected && (
+                    <ConnectKitButton.Custom>
+                      {({ isConnected, show, truncatedAddress, ensName }) => {
+                        return (
+                          <button
+                            onClick={show}
+                            className="mt-10 rounded-full bg-sky-500 px-10 py-2 text-lg font-normal text-slate-300 hover:bg-sky-700 md:px-20 md:py-4"
+                          >
+                            {!isConnected &&
+                              (provider === "twitter"
+                                ? "Claim @" + (handleData ?? "")
+                                : "Claim @" + (session?.user?.name ?? ""))}
+                          </button>
+                        );
+                      }}
+                    </ConnectKitButton.Custom>
+                  )}
+                  {isConnected && (
+                    <button
+                      onClick={handleClaim}
+                      className="mt-10 rounded-full bg-sky-500 px-10 py-2 text-lg font-normal text-slate-300 hover:bg-sky-700 md:px-20 md:py-4"
+                    >
+                      {isSuccess &&
+                        "Claimed! Here's the proof: " + JSON.stringify(data)}
+                      {isLoading && "Your claim is being processed"}
+                      {isConnected &&
+                        !isContractLoading &&
+                        (provider === "twitter"
+                          ? "Claim @" +
+                            (handleData ?? "") +
+                            " to " +
+                            (address ?? "")
+                          : "Claim @" +
+                            (session?.user?.name ?? "") +
+                            " to " +
+                            (address ?? ""))}
+                    </button>
+                  )}
+                  {!!session && (
+                    <button
+                      onClick={!isConnected ? handleLogin : () => disconnect()}
+                      className="mt-4 text-sm text-white"
+                    >
+                      {!isConnected ? "Sign Out" : "Disconnect Wallet"}
+                    </button>
+                  )}
                 </>
               )}
             </div>
