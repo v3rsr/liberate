@@ -1,5 +1,7 @@
 # Liberate
 
+![Liberate](/cryBird.png "Title")
+
 ## Mint your twitter handle into your wallet and never let anyone deplatform you
 
 We are on a mission to enable everyone to bridge their social graph data from large media platforms to decentralized social networks. We’ve built a production-ready app that enables people to store Twitter metadata (currently: user handles) in a non-transferable NFT that can be permanently bound to a Lens Profile NFT.
@@ -54,7 +56,3 @@ If you would like to contribute to the T-3 app, please follow these steps:
 4. Make the necessary changes and commit them to the new branch.
 5. Push the branch to your forked repository on GitHub.
 6. Create a pull request from the new branch to the original repository.
-
-## License
-
-The T-3 app is licensed under the MIT License. See the `LICENSE` file for more information.
