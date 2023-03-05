@@ -23,6 +23,8 @@
     "next-auth": "^4.20.1",
     "oauth": "^0.10.0",
     "react": "18.2.0",
+    "react-canvas-confetti": "^1.3.0",
+    "react-confetti": "^6.1.0",
     "react-dom": "18.2.0",
     "superjson": "1.9.1",
     "wagmi": "^0.10.15",

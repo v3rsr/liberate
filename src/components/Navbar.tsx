@@ -13,15 +13,6 @@ export const Navbar: FC = () => {
         <img src="/img/logo.png" className="flex h-7 w-8 " />
         <div className="font-sans text-2xl font-bold text-white">Liberate</div>
       </div>
-      <div className="flex flex-row gap-10 font-inter">
-        <div className="hidden text-sm text-slate-500 md:block">Home</div>
-        <div className="hidden text-sm text-slate-500 md:block">
-          Open Source
-        </div>
-        <div className="hidden text-sm text-slate-500 md:block">
-          Contributions
-        </div>
-      </div>
       <div>
         <div
           onClick={handleLogin}

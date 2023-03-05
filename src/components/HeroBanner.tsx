@@ -8,6 +8,7 @@ import { type IHandleData } from "~/pages/api/twitter/getHandle";
 import jailBreaker from "../../utils/jailBreaker.json";
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
 import { useDisconnect } from "wagmi";
+import Confetti from "react-confetti";
 
 // const contractConfig: UseContractConfig = {
 //   address: jailBreaker.address,
@@ -23,12 +24,14 @@ const Navbar: FC = () => {
   const [handleData, setHandleData] = useState("");
   const [provider, setProvider] = useState("");
   const [isHandleLoading, setIsHandleLoading] = useState(false);
-  const [isContractLoading, setIsContractLoading] = useState(false);
+  const [contractError, setContractError] = useState(false);
+  const [completedTransaction, setCompletedTransaction] = useState(false);
   const { address, isConnected } = useAccount();
 
   const { disconnect } = useDisconnect();
 
-  console.log(session);
+  const stringAdd = address as string;
+  const truncAdd = stringAdd?.slice(0, 5) + "..." + stringAdd?.slice(-4);
 
   useEffect(() => {
     setIsHandleLoading(true);
@@ -42,7 +45,6 @@ const Navbar: FC = () => {
 
     setIsHandleLoading(false);
   }, [handleData, isHandleLoading]);
-  console.log(provider);
 
   const { config, error } = usePrepareContractWrite({
     address: jailBreaker.address as `0x${string}`,
@@ -57,14 +59,15 @@ const Navbar: FC = () => {
     try {
       write?.();
     } catch (e) {
-      console.log(e);
+      setContractError(true);
     } finally {
-      console.log("finally");
+      setCompletedTransaction(true);
     }
   };
 
   return (
     <div className="my-20 mx-8 md:mx-auto md:my-40">
+      {isSuccess && data && <Confetti />}
       <div className="rounded-2xl bg-transparent shadow-[30px_38px_100px_5px_rgb(0,254,162,0.25)]">
         <div className="w-full rounded-2xl bg-gradient-to-b from-white to-transparent p-[1px] shadow-[-51px_-11px_100px_5px_rgb(193,90,193,0.25)]">
           <div className="back flex h-full w-full items-center justify-center rounded-2xl bg-[#0C293F]">
@@ -112,23 +115,39 @@ const Navbar: FC = () => {
                   )}
                   {isConnected && (
                     <button
-                      onClick={handleClaim}
+                      onClick={
+                        !data
+                          ? handleClaim
+                          : () => {
+                              return;
+                            }
+                      }
                       className="mt-10 rounded-full bg-sky-500 px-10 py-2 text-lg font-normal text-slate-300 hover:bg-sky-700 md:px-20 md:py-4"
                     >
-                      {isSuccess &&
-                        "Claimed! Here's the proof: " + JSON.stringify(data)}
+                      {isSuccess && data && "Claimed! Here's the proof: " && (
+                        <a
+                          href={`https://mumbai.polygonscan.com/tx/${
+                            data?.hash ?? ""
+                          }`}
+                        >
+                          View Transaction on PolygonScan
+                        </a>
+                      )}
+
                       {isLoading && "Your claim is being processed"}
                       {isConnected &&
-                        !isContractLoading &&
+                        !isLoading &&
+                        !isSuccess &&
+                        !data &&
                         (provider === "twitter"
                           ? "Claim @" +
                             (handleData ?? "") +
                             " to " +
-                            (address ?? "")
+                            (truncAdd ?? "")
                           : "Claim @" +
                             (session?.user?.name ?? "") +
                             " to " +
-                            (address ?? ""))}
+                            (truncAdd ?? ""))}
                     </button>
                   )}
                   {!!session && (
