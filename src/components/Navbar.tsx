@@ -11,7 +11,7 @@ export const Navbar: FC = () => {
     <div className="flex items-center justify-center gap-4 py-10 md:justify-between md:px-24">
       <div className="flex flex-row gap-2 pl-2">
         <img src="/img/logo.png" className="flex h-7 w-8 " />
-        <div className="font-sans text-2xl font-bold text-white">ElonDrop</div>
+        <div className="font-sans text-2xl font-bold text-white">Liberate</div>
       </div>
       <div className="flex flex-row gap-10 font-inter">
         <div className="hidden text-sm text-slate-500 md:block">Home</div>

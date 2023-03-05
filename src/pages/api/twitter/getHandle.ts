@@ -3,13 +3,14 @@ import { getToken } from "next-auth/jwt";
 import { getSession } from "next-auth/react";
 import { env } from "../../../../src/env.mjs";
 
-export type Data = {
+export type IHandleData = {
   handle: string;
+  provider: string;
 };
 
 const getHandle = async (
   req: NextApiRequest,
-  res: NextApiResponse<Data | Error>
+  res: NextApiResponse<IHandleData | Error>
 ) => {
   const session = await getSession({ req });
   const token = await getToken({
@@ -17,7 +18,10 @@ const getHandle = async (
     secret: env.NEXTAUTH_SECRET,
   });
   if (session && token) {
-    res.status(200).json({ handle: token.username as string });
+    res.status(200).json({
+      handle: token.username as string,
+      provider: token.provider as string,
+    });
   }
   res.status(400).json(new Error("No session or token"));
 };

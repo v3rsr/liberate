@@ -22,10 +22,16 @@ export const authOptions: AuthOptions = {
     }),
   ],
   callbacks: {
-    jwt({ token, profile }) {
-      if (profile) {
+    jwt({ token, account, profile }) {
+      if (account && account?.provider !== "twitter" && !token.provider) {
+        token.provider = account.userId;
+        token.provider = account.provider;
+        return token;
+      }
+      if (account && profile && !token.username) {
         const userProfile = profile as IProfile;
-        token.username = userProfile.data.username;
+        token.username = userProfile.data.username ?? "";
+        token.provider = account.provider;
       }
       return token;
     },

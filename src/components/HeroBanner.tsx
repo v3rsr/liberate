@@ -1,10 +1,10 @@
 import { FC, useEffect, useState } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signIn, signOut, SessionContext } from "next-auth/react";
 import { ConnectKitButton } from "connectkit";
 import { prepareWriteContract, writeContract } from "@wagmi/core";
 import { erc721ABI } from "wagmi";
 import { InferGetServerSidePropsType } from "next";
-import { type Data } from "~/pages/api/twitter/getHandle";
+import { type IHandleData } from "~/pages/api/twitter/getHandle";
 
 export const getServerSideProps = async () => {
   const res = await fetch("/api/twitter/getHandle");
@@ -25,18 +25,24 @@ const Navbar: FC = () => {
   };
 
   const [data, setData] = useState("");
+  const [provider, setProvider] = useState("");
   const [isLoading, setLoading] = useState(false);
+
+  console.log(session);
 
   useEffect(() => {
     setLoading(true);
     const handle = fetch("/api/twitter/getHandle")
       .then((res) => res.json())
-      .then((data: Data) => {
+      .then((data: IHandleData) => {
         setData(data.handle);
+        setProvider(data.provider);
         setLoading(false);
       });
+
     setLoading(false);
   }, [data, isLoading]);
+  console.log(provider);
 
   // const handleConnect = (address: `0x${string}`) => {
   //   // const config = await prepareWriteContract({
@@ -57,7 +63,8 @@ const Navbar: FC = () => {
               </div>
               <div className=" w-/5 text-md text-center font-inter text-slate-500	">
                 Prevent your twitter handle, identity and tweet history from
-                being taken away by storing all your past interactions locally.
+                being taken away by storing all your past interactions on the
+                global blockchain.
               </div>
               <div className="mt-10"></div>
               {!session && (
@@ -80,18 +87,32 @@ const Navbar: FC = () => {
                       return (
                         <button
                           onClick={show}
-                          className="mt-10 rounded-full bg-sky-500 px-20 py-4 text-lg font-normal text-slate-300 hover:bg-sky-700"
+                          className="mt-10 rounded-full bg-sky-500 px-10 py-2 text-lg font-normal text-slate-300 hover:bg-sky-700 md:px-20 md:py-4"
                         >
-                          {isConnected && data !== ""
-                            ? "Claim @" +
-                              (data ?? "") +
-                              " to " +
-                              (ensName ?? truncatedAddress ?? "")
-                            : "Claim @" + (data ?? "")}
+                          {isConnected &&
+                            (provider === "twitter"
+                              ? "Claim @" +
+                                (data ?? "") +
+                                " to " +
+                                (ensName ?? truncatedAddress ?? "")
+                              : "Claim @" +
+                                (session?.user?.name ?? "") +
+                                " to " +
+                                (ensName ?? truncatedAddress ?? ""))}
+                          {!isConnected &&
+                            (provider === "twitter"
+                              ? "Claim @" + (data ?? "")
+                              : "Claim @" + (session?.user?.name ?? ""))}
                         </button>
                       );
                     }}
                   </ConnectKitButton.Custom>
+                  <button
+                    onClick={handleLogin}
+                    className="mt-4 text-sm text-white md:hidden"
+                  >
+                    Sign out
+                  </button>
                 </>
               )}
             </div>
