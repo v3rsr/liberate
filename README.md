@@ -8,9 +8,7 @@ We are on a mission to enable everyone to bridge their social graph data from la
 
 Pitch deck: https://pitch.com/public/60479da4-2ef2-45b5-b06d-37c07be03563/486e31bb-f432-4c3a-9d51-320955484089
 
-Live prototype (please try desktop first): https://liberate-sage.vercel.app/
-
-Check out the proof of concept at https://liberate-sage.vercel.app/
+Live prototype (please try desktop first, twitter API causes redirect issues on mobiile [we are working on a solution!]): https://liberate-sage.vercel.app/
 
 Check out demo video at https://www.loom.com/share/b1eada1faa7b49b98dcf5297350769a9
 

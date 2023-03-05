@@ -1,14 +1,13 @@
 import { FC, useEffect, useState } from "react";
-import { useSession, signIn, signOut, SessionContext } from "next-auth/react";
+import { useSession, signIn, signOut } from "next-auth/react";
 import { ConnectKitButton } from "connectkit";
-import { prepareWriteContract, writeContract } from "@wagmi/core";
-import { erc721ABI, useAccount, UseContractConfig } from "wagmi";
-import { InferGetServerSidePropsType } from "next";
+import { useAccount } from "wagmi";
 import { type IHandleData } from "~/pages/api/twitter/getHandle";
 import jailBreaker from "../../utils/jailBreaker.json";
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
 import { useDisconnect } from "wagmi";
 import Confetti from "react-confetti";
+import toast, { Toaster } from "react-hot-toast";
 
 // const contractConfig: UseContractConfig = {
 //   address: jailBreaker.address,
@@ -27,7 +26,6 @@ const Navbar: FC = () => {
   const [contractError, setContractError] = useState(false);
   const [completedTransaction, setCompletedTransaction] = useState(false);
   const { address, isConnected } = useAccount();
-
   const { disconnect } = useDisconnect();
 
   const stringAdd = address as string;
@@ -50,10 +48,14 @@ const Navbar: FC = () => {
     address: jailBreaker.address as `0x${string}`,
     abi: jailBreaker.abi,
     functionName: "mint",
-    args: [handleData ?? session?.user?.name, address],
+    args: [encodeURIComponent(handleData ?? session?.user?.name), address],
   });
 
-  const { data, isLoading, isSuccess, write } = useContractWrite(config);
+  const { data, isLoading, isSuccess, write, isError } =
+    useContractWrite(config);
+
+  const errorProfileExists =
+    error?.message?.includes("Profile already exists") ?? false;
 
   const handleClaim = () => {
     try {
@@ -63,11 +65,19 @@ const Navbar: FC = () => {
     } finally {
       setCompletedTransaction(true);
     }
+    if (errorProfileExists) {
+      toast.error("This Profile has been minted! Cannot initiate transaction");
+    }
   };
 
   return (
     <div className="my-20 mx-8 md:mx-auto md:my-40">
       {isSuccess && data && <Confetti />}
+      {contractError && (
+        <div className="text-red-500">
+          Something went wrong. Please try again.
+        </div>
+      )}
       <div className="rounded-2xl bg-transparent shadow-[30px_38px_100px_5px_rgb(0,254,162,0.25)]">
         <div className="w-full rounded-2xl bg-gradient-to-b from-white to-transparent p-[1px] shadow-[-51px_-11px_100px_5px_rgb(193,90,193,0.25)]">
           <div className="back flex h-full w-full items-center justify-center rounded-2xl bg-[#0C293F]">
@@ -134,7 +144,13 @@ const Navbar: FC = () => {
                         </a>
                       )}
 
-                      {isLoading && "Your claim is being processed"}
+                      {isLoading &&
+                        !errorProfileExists &&
+                        "Your claim is being processed"}
+                      {isLoading &&
+                        errorProfileExists &&
+                        "You cannot claim this handle"}
+
                       {isConnected &&
                         !isLoading &&
                         !isSuccess &&
@@ -160,6 +176,7 @@ const Navbar: FC = () => {
                   )}
                 </>
               )}
+              <Toaster />
             </div>
           </div>
         </div>
