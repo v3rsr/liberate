@@ -3,7 +3,10 @@ import TwitterProvider from "next-auth/providers/twitter";
 import DiscordProvider from "next-auth/providers/discord";
 import { env } from "../../../../src/env.mjs";
 import type { AuthOptions } from "next-auth";
-import { Profile } from "next-auth";
+
+interface IProfile {
+  data: Record<string, string>;
+}
 
 export const authOptions: AuthOptions = {
   // Configure one or more authentication providers
@@ -21,7 +24,7 @@ export const authOptions: AuthOptions = {
   callbacks: {
     jwt({ token, profile }) {
       if (profile) {
-        const userProfile = profile;
+        const userProfile = profile as IProfile;
         token.username = userProfile.data.username;
       }
       return token;

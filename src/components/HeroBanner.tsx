@@ -47,12 +47,12 @@ const Navbar: FC = () => {
   //   const data = await writeContract(confi  g);
   // };
   return (
-    <div className="mx-auto my-40">
+    <div className="my-20 mx-8 md:mx-auto md:my-40">
       <div className="rounded-2xl bg-transparent shadow-[30px_38px_100px_5px_rgb(0,254,162,0.25)]">
         <div className="w-full rounded-2xl bg-gradient-to-b from-white to-transparent p-[1px] shadow-[-51px_-11px_100px_5px_rgb(193,90,193,0.25)]">
           <div className="back flex h-full w-full items-center justify-center rounded-2xl bg-[#0C293F]">
-            <div className="flex h-auto max-w-[765px] flex-col items-center justify-center p-20">
-              <div className=" mb-5 font-sans text-5xl font-black text-white">
+            <div className="flex h-auto max-w-[765px] flex-col items-center justify-center p-8 md:p-20">
+              <div className=" mb-5 text-center font-sans text-5xl font-black text-white">
                 Own your Twitter
               </div>
               <div className=" w-/5 text-md text-center font-inter text-slate-500	">

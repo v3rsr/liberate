@@ -38,7 +38,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <main
-      className={`${calSans.variable} font-sans ${inter.variable} font-inter`}
+      className={`${calSans.variable} font-sans ${inter.variable} font-inter `}
     >
       <WagmiConfig client={client}>
         <ConnectKitProvider>
