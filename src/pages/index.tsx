@@ -13,7 +13,7 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>ElonDrop</title>
+        <title>Liberate</title>
         <meta name="description" content="Own your Twitter" />
         <link rel="icon" href="/favicon.ico" />
       </Head>

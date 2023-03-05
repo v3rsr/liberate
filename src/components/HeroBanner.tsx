@@ -1,6 +1,50 @@
-import type { FC } from "react";
+import { FC, useEffect, useState } from "react";
+import { useSession, signIn, signOut } from "next-auth/react";
+import { ConnectKitButton } from "connectkit";
+import { prepareWriteContract, writeContract } from "@wagmi/core";
+import { erc721ABI } from "wagmi";
+import { InferGetServerSidePropsType } from "next";
+import { getToken } from "next-auth/jwt";
+
+export const getServerSideProps = async () => {
+  const res = await fetch("/api/twitter/getHandle");
+  const handle: string = (await res.json()) as string;
+  console.log(handle);
+
+  return {
+    props: {
+      handle,
+    },
+  };
+};
 
 const Navbar: FC = () => {
+  const { data: session } = useSession();
+  const handleLogin = () => {
+    session ? void signOut() : void signIn();
+  };
+
+  // const [data, setData] = useState(null)
+  // const [isLoading, setLoading] = useState(false)
+
+  // useEffect(() => {
+  //   setLoading(true)
+  //   fetch('/api/twitter/getHandle')
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       setData(data)
+  //       setLoading(false)
+  //     })
+  // }, [])
+
+  // const handleConnect = (address: `0x${string}`) => {
+  //   // const config = await prepareWriteContract({
+  //   //   address: address,
+  //   //   abi: erc721ABI,
+  //   //   functionName: "approve",
+  //   // });
+  //   const data = await writeContract(confi  g);
+  // };
   return (
     <div className="mx-auto my-40">
       <div className="rounded-2xl bg-transparent shadow-[30px_38px_100px_5px_rgb(0,254,162,0.25)]">
@@ -15,9 +59,40 @@ const Navbar: FC = () => {
                 being taken away by storing all your past interactions locally.
               </div>
               <div className="mt-10"></div>
-              <div className="rounded-full bg-sky-500 px-20 py-4 text-sm text-slate-300 hover:bg-sky-700">
-                Log In
-              </div>
+              {!session && (
+                <button
+                  onClick={handleLogin}
+                  className="rounded-full bg-sky-500 px-20 py-4 text-lg font-normal text-slate-300 hover:bg-sky-700"
+                >
+                  Reclaim your identity
+                </button>
+              )}
+              {!!session && (
+                <>
+                  <img
+                    src={session?.user?.image ?? ""}
+                    alt="user image"
+                    className="rounded-2xl"
+                  />
+                  <ConnectKitButton.Custom>
+                    {({ isConnected, show, truncatedAddress, ensName }) => {
+                      return (
+                        <button
+                          onClick={show}
+                          className="mt-10 rounded-full bg-sky-500 px-20 py-4 text-lg font-normal text-slate-300 hover:bg-sky-700"
+                        >
+                          {isConnected
+                            ? "Claim @" +
+                              (session?.user?.name ?? "") +
+                              " to " +
+                              (ensName ?? truncatedAddress ?? "")
+                            : "Claim @" + (session?.user?.name ?? "")}
+                        </button>
+                      );
+                    }}
+                  </ConnectKitButton.Custom>
+                </>
+              )}
             </div>
           </div>
         </div>
