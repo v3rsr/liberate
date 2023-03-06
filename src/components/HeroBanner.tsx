@@ -73,7 +73,7 @@ const Navbar: FC = () => {
   return (
     <div className="my-20 mx-8 md:mx-auto md:my-40">
       {isSuccess && data && <Confetti />}
-      {contractError && (
+      {(contractError || isError || error) && (
         <div className="text-red-500">
           Something went wrong. Please try again.
         </div>
